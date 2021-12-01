@@ -17,32 +17,40 @@ class MarkovMachine {
    *  {"the": ["cat", "hat"], "cat": ["in"], "in": ["the"], "hat": [null]} */
 
   makeChains() {
-    let chains = {}
+    let chains = new Map()
     const arrSize = this.words.length
     for (let i=0; i<arrSize; i++) {
       const word = this.words[i]
-      if (chains[word]) {
-        if (i+1 < arrSize) {
-          chains[word].push(this.words[i+1])
-        } else {
-          chains[word].push(null)
-        }
+      const nextWord = this.words[i + 1] || null
+      if (chains.has(word)) {
+        chains.get(word).push(nextWord)
       }
-      else if (i+1 < arrSize) {
-        chains[word] = [this.words[i+1]]
-      } else {
-        chains[word] = [null]
+      else {
+        chains.set(word, [nextWord])
       }
     }
     this.chains = chains
   }
 
+  /** Get random word from chains */
+  static randomWord(words) {
+    const idx = Math.floor(Math.random() * words.length)
+    return words[idx]
+  }
 
   /** return random text from chains */
 
   makeText(numWords = 100) {
     // TODO
+    const firstWords = Array.from(this.chains.keys())
+    let word = MarkovMachine.randomWord(firstWords)
+    let output = []
+    while (word !== null && output.length < numWords) {
+      output.push(word)
+      word = MarkovMachine.randomWord(this.chains.get(word))
+    }
+    return output.join(' ')
   }
 }
 
-let mm = new MarkovMachine("the cat in the hat")
+module.exports = {MarkovMachine}
